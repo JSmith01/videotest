@@ -1,0 +1,10 @@
+{
+  "name": "videotest",
+  "version": "0.0.1",
+  "devDependencies": {
+    "serve": "^11.3.2"
+  },
+  "scripts": {
+    "start": "serve ."
+  }
+}

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test camera</title>
+</head>
+<body>
+<h1>Media test</h1>
+<div id="device_id"></div>
+<div style="position: relative;">
+    <video width="480" height="270" id="player" autoplay style="border: 1px solid black"></video>
+    <pre id="description" style="position: absolute; left: 490px; width: 300px; top: 0;"></pre>
+</div>
+<div>
+    <label>
+        <input type="checkbox" id="hd_video"> HD video
+    </label>
+</div>
+<div>
+    <button onclick="requestStream()">Request</button>
+</div>
+<script>
+    const c_hd = {"height":{"min":180,"ideal":720},"width":{"min":320,"ideal":1280},"aspectRatio":{"ideal":1.7777777778},"frameRate":{"ideal":24,"max":24}};
+
+    const c_sd = {"height":{"min":180,"ideal":360},"width":{"min":320,"ideal":640},"aspectRatio":{"ideal":1.7777777778},"frameRate":{"ideal":24,"max":24}};
+
+    var stream;
+
+    var deviceId;
+
+    navigator.mediaDevices.enumerateDevices().then(devices => {
+        deviceId = [...devices].find(d => d.kind === 'videoinput')?.deviceId;
+        window.device_id.innerText = `Device ID: ${deviceId}`;
+    });
+
+    async function requestStream() {
+        const video =  window.hd_video.checked ? c_hd : c_sd;
+        if (stream) {
+            window.player.srcObject = null;
+            stream.getTracks().forEach(track => track.stop());
+            stream = null;
+        }
+        const constraints = deviceId ? { video: { ...video, deviceId: { exact: deviceId } } } : { video };
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
+        window.player.srcObject = stream;
+        const settings = stream.getVideoTracks()[0].getSettings();
+        window.description.innerText = Object.entries(settings).map(([k, v]) => `${k}: ${v}`).join('\n');
+    }
+</script>
+</body>
+</html>
